@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excluir Conta - PlanEJA</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+    :root {
+      --primary: #4CAF50;
+      --error: #F44336;
+      --text: #1C1C1E;
+      --text-secondary: #8E8E93;
+      --background: #F2F2F7;
+      --surface: #FFFFFF;
+      --border: #E5E5EA;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      background-color: var(--surface);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .icon-container {
+      width: 64px;
+      height: 64px;
+      background-color: #FEE2E2;
+      border-radius: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 24px;
+    }
+
+    .icon-container svg {
+      width: 32px;
+      height: 32px;
+      color: var(--error);
+    }
+
+    h1 {
+      font-weight: 800;
+      font-size: 24px;
+      margin: 0 0 12px;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.5;
+      margin: 0 0 32px;
+    }
+
+    .input-group {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      margin-left: 4px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      font-size: 16px;
+      font-family: 'Nunito', sans-serif;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--error);
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background-color: var(--error);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error {
+      display: block;
+      background-color: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .message.success {
+      display: block;
+      background-color: #DEF7EC;
+      color: #03543F;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="icon-container">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+    </div>
+    
+    <h1>Excluir Conta</h1>
+    <p>Atenção: Ao excluir sua conta, todos os seus dados financeiros serão apagados permanentemente.</p>
+
+    <form id="deleteForm">
+      <div class="input-group">
+        <label for="username">Nome de Usuário</label>
+        <input type="text" id="username" required placeholder="Seu usuário no app">
+      </div>
+      
+      <div class="input-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" required placeholder="Sua senha">
+      </div>
+
+      <button type="submit" id="submitBtn">Confirmar Exclusão</button>
+    </form>
+
+    <div id="messageBox" class="message"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://planeja-backend.onrender.com/api/auth/delete-account-web';
+    
+    const form = document.getElementById('deleteForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageBox = document.getElementById('messageBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Excluindo...';
+      messageBox.className = 'message';
+      messageBox.innerText = '';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messageBox.className = 'message success';
+          messageBox.innerText = data.message || 'Sua conta e todos os seus dados foram excluídos com sucesso.';
+          form.reset();
+          submitBtn.style.display = 'none';
+        } else {
+          messageBox.className = 'message error';
+          messageBox.innerText = data.message || 'Erro ao excluir conta. Verifique suas credenciais.';
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Confirmar Exclusão';
+        }
+      } catch (error) {
+        messageBox.className = 'message error';
+        messageBox.innerText = 'Erro de conexão. O servidor pode estar fora do ar.';
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Confirmar Exclusão';
+      }
+    });
+  </script>
+</body>
+</html>
